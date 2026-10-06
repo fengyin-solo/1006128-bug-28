@@ -1,5 +1,12 @@
 import { MODULE_BY_KEY } from '@/data/modules'
 import { allRows, listRows, resetRows, saveRows } from '@/data/local-store'
+import {
+  MUCK_KEY,
+  allEntryRows,
+  muckStats,
+  queryAsPageResult,
+  transitionOrder,
+} from '@/data/muck-domain'
 import type { ActionResult, EntryRow, ModuleMeta, OverviewResult, PageResult } from '@/data/types'
 
 // 会写进数据的「往回走」动作：命中就把这条记录标成异常态，看板上能一眼看出来。
@@ -24,12 +31,19 @@ export function filterRows(rows: EntryRow[], filters: Record<string, string>): E
 }
 
 export function listEntries(key: string, filters: Record<string, string> = {}): PageResult {
+  // 渣土外运只认运输单这一份：旧入口同样走统一口径，条件交集、结论与新页面一致。
+  if (key === MUCK_KEY) {
+    return queryAsPageResult(filters)
+  }
   const matched = filterRows(listRows(key), filters)
   return { items: matched, total: matched.length, page: 1, size: matched.length }
 }
 
-export function runAction(key: string, id: number, action: string): ActionResult {
+export function runAction(key: string, id: number, action: string, payload?: string): ActionResult {
   const meta = moduleMeta(key)
+  if (key === MUCK_KEY) {
+    return transitionOrder(id, action, payload)
+  }
   const target = meta.actionTargets[action]
   if (!target) {
     return { ok: false, message: `${meta.entity}没有登记「${action}」这个动作` }
@@ -65,7 +79,8 @@ export function exportEntries(key: string): { filename: string; content: string 
   const meta = moduleMeta(key)
   const header = ['编号', ...meta.fields, '当前状态']
   const lines = [header.join(',')]
-  for (const row of listRows(key)) {
+  const rows = key === MUCK_KEY ? allEntryRows() : listRows(key)
+  for (const row of rows) {
     lines.push([row.id, ...meta.fields.map((field) => row[field] ?? ''), row.status].join(','))
   }
   return { filename: `${meta.name}-清单.csv`, content: `\uFEFF${lines.join('\n')}` }
@@ -86,7 +101,23 @@ export function downloadEntries(key: string): void {
 
 export function loadOverview(): OverviewResult {
   const rows = allRows()
+  // 渣土外运的统计只认运输单这一份：pending/abnormal 由统一口径重算，
+  // 不读台账里可能残留的上一版标记，别处统计随之对齐。
+  let muckOverview: { created: number; pending: number; abnormal: number } | null = null
+  try {
+    const stats = muckStats()
+    muckOverview = {
+      created: allEntryRows().length,
+      pending: stats.待装车 + stats.运输中 + stats.已滞留,
+      abnormal: stats.已滞留,
+    }
+  } catch {
+    muckOverview = null
+  }
   const modules = [...MODULE_BY_KEY.values()].map((meta) => {
+    if (meta.key === MUCK_KEY && muckOverview) {
+      return { name: meta.name, ...muckOverview }
+    }
     const entries = rows[meta.key] ?? []
     return {
       name: meta.name,

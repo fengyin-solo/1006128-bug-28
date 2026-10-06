@@ -41,11 +41,26 @@ export function listRows(key: string): EntryRow[] {
 }
 
 export function saveRows(key: string, rows: EntryRow[]): void {
+  replaceRowsAtomic(key, rows)
+}
+
+/**
+ * 原子落库：先写 localStorage，写成功了才更新内存缓存。
+ * 落库抛错时内存保持原样，调用方拿到异常即可保证「整套撤回」，不会留下半套数据。
+ */
+export function replaceRowsAtomic(key: string, rows: EntryRow[]): void {
   const next = { ...allRows(), [key]: rows }
-  cache = next
   if (typeof window !== 'undefined' && window.localStorage) {
+    // 先落库：setItem 抛错（配额满 / 存储故障）时直接向外抛，缓存保持原样，整套撤回。
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
   }
+  cache = next
+}
+
+/** 重新从存储装载（供取数失败后的重试使用，避免沿用上一轮的内存结果）。 */
+export function reloadStorage(): Record<string, EntryRow[]> {
+  cache = readStorage()
+  return cache
 }
 
 export function resetRows(key: string): EntryRow[] {

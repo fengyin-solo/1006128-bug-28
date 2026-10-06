@@ -25,6 +25,16 @@ export type PageResult = {
   total: number
   page: number
   size: number
+  /** 交集筛选时每个条件单独命中的条数，用于说明到底是哪个条件把结果卡没了。 */
+  diagnostics?: FilterDiagnostic[]
+}
+
+export type FilterDiagnostic = {
+  field: string
+  label: string
+  value: string
+  matched: number
+  blocked: boolean
 }
 
 export type ActionResult = {

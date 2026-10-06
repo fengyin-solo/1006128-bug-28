@@ -35,3 +35,48 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .error-text { color: #b42318; }
 .status-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 10px; font-size: 12px; color: var(--muted); }
 .legend-item { background: #eef2f7; border-radius: 999px; padding: 2px 10px; }
+.legend-item.active { background: #fee4e2; color: #b42318; }
+.legend-item[role="button"] { cursor: pointer; }
+
+/* 渣土外运：身份条、筛选诊断、分页、弹窗/抽屉 */
+.identity-bar { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 13px; }
+.identity-item span { font-size: 12px; color: var(--muted); margin-right: 6px; }
+.identity-hint { color: var(--muted); font-size: 12px; }
+.filter-diagnostic { background: #fff8eb; border: 1px solid #f5c97a; color: #8a5a00; border-radius: 6px; padding: 6px 10px; font-size: 13px; margin: 0 0 10px; }
+.filter-diagnostic.muted { background: #f1f5f9; border-color: var(--border); color: var(--muted); }
+.pager { display: flex; align-items: center; gap: 8px; }
+.pager .btn:disabled { opacity: .5; cursor: not-allowed; }
+.foot-tools { display: flex; align-items: center; gap: 12px; }
+.fault-toggle { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+.data-table tr.detained { background: #fff6f5; }
+.cell-reason { color: #b42318; font-size: 12px; }
+.cell-warn { color: #b42318; font-weight: 600; }
+.detained-list { margin: 0; padding-left: 16px; }
+.detained-list li { font-size: 12px; color: #b42318; }
+.warn-text { color: #b42318; }
+.sub-head { margin: 20px 0 8px; font-size: 15px; }
+.source-note { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
+.form-message { font-size: 13px; margin-top: 8px; }
+.form-message.ok { color: #067647; }
+.form-message.error { color: #b42318; }
+
+.modal-mask { position: fixed; inset: 0; background: rgba(16, 24, 40, .45); display: flex; align-items: center; justify-content: center; z-index: 20; }
+.modal { background: #fff; border-radius: 10px; width: 560px; max-width: calc(100vw - 32px); max-height: 88vh; overflow: auto; padding: 18px 20px; }
+.modal-sm { width: 420px; }
+.modal h3, .drawer h3 { margin: 0 0 12px; font-size: 16px; }
+.modal-note { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.modal-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+.modal-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+.modal-form label:first-of-type, .modal-form .modal-actions { grid-column: 1 / -1; }
+.modal-form input, .modal-form select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; color: #1f2937; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+.drawer-mask { position: fixed; inset: 0; background: rgba(16, 24, 40, .35); z-index: 20; display: flex; justify-content: flex-end; }
+.drawer { background: #fff; width: 480px; max-width: 100vw; height: 100%; overflow: auto; padding: 18px 20px; }
+.drawer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.detail-grid { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; margin: 0 0 18px; font-size: 13px; }
+.detail-grid dt { color: var(--muted); }
+.detail-grid dd { margin: 0; }
+.detail-detained h4 { font-size: 13px; margin: 0 0 6px; }
+.detail-detained ul { margin: 0; padding-left: 18px; }
+.detail-detained li { font-size: 12px; color: #b42318; margin-bottom: 4px; }
+.muted { color: var(--muted); }
