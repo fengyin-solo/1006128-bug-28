@@ -67,6 +67,39 @@
       <span>共 {{ total }} 条掘进环次记录</span>
       <span v-if="errorMessage" class="error-text">{{ errorMessage }}</span>
     </footer>
+
+    <section class="sync-panel">
+      <h3>出土方量清单（由渣土外运结论同步）</h3>
+      <p class="hint-text">
+        出土方量以渣土外运台账为准：已消纳车次的方量合计；滞留车次与渣土外运列表同源，两处一致。
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>环号</th>
+            <th>同步出土方量（方）</th>
+            <th>已消纳车次</th>
+            <th>滞留车次</th>
+            <th>最近外运日期</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="entry in soilManifest" :key="entry.环号">
+            <td>{{ entry.环号 }}</td>
+            <td>
+              <template v-if="entry.出土方量 !== null">{{ entry.出土方量 }}</template>
+              <template v-else>—（暂无外运结论）</template>
+            </td>
+            <td>{{ entry.已消纳车次 }}</td>
+            <td>{{ entry.滞留车次 }}</td>
+            <td>{{ entry.最近外运日期 || '—' }}</td>
+          </tr>
+          <tr v-if="!soilManifest.length">
+            <td colspan="5" class="empty-state">暂无环次数据</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
   </section>
 </template>
 
@@ -79,6 +112,8 @@ import {
   moduleMeta,
   runAction as applyAction,
 } from '@/api/local-service'
+import { ringSoilManifest } from '@/api/muck-service'
+import type { RingSoilEntry } from '@/domain/muck'
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('ring')
@@ -92,6 +127,7 @@ const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
 const filterFields = columns.slice(0, 3)
+const soilManifest = ref<RingSoilEntry[]>([])
 const statusSummary = computed(() =>
   statuses.map((status: string) => ({
     status,
@@ -128,6 +164,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    soilManifest.value = ringSoilManifest()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '掘进环次列表读取失败'
   }
